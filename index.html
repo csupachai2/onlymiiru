@@ -1,1 +1,377 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Letter For You</title>
+    <!-- ใช้ฟอนต์ Mali เพื่อความน่ารัก ฮีลใจ เหมือนลายมือ -->
+    <link href="https://fonts.googleapis.com/css2?family=Mali:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: {
+                            100: '#FDFBF7',
+                            200: '#FAF0E6',
+                            300: '#F0E6D2',
+                        },
+                        brown: {
+                            300: '#D4A373',
+                            400: '#BC8A5F',
+                            800: '#5C4033',
+                        },
+                        accent: '#E9C46A'
+                    },
+                    fontFamily: {
+                        'sans': ['Mali', 'sans-serif'],
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce 3s infinite',
+                        'float': 'float 4s ease-in-out infinite',
+                        'slide-up': 'slideUp 0.8s ease-out forwards',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(50px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FDFBF7;
+            background-image: radial-gradient(#D4A373 0.5px, transparent 0.5px);
+            background-size: 20px 20px;
+            color: #5C4033;
+        }
+        
+        .glass-panel {
+            background: rgba(250, 240, 230, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(212, 163, 115, 0.3);
+            box-shadow: 0 10px 25px rgba(92, 64, 51, 0.05);
+        }
 
+        .letter-paper {
+            background-color: #FFFDF9;
+            background-image: 
+                linear-gradient(transparent 95%, #F0E6D2 95%);
+            background-size: 100% 2rem;
+            box-shadow: 2px 4px 15px rgba(0,0,0,0.05);
+            border-radius: 4px;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Floating Music Toggle Button -->
+    <button id="bgm-toggle" class="fixed bottom-6 right-6 w-14 h-14 bg-white/90 backdrop-blur border-2 border-brown-300 shadow-xl shadow-brown-300/20 rounded-full text-brown-300 hover:text-brown-400 hover:scale-110 transition-all z-50 flex items-center justify-center text-2xl animate-bounce">
+        <i class="fa-solid fa-volume-xmark"></i>
+    </button>
+
+    <!-- Screen 1: หน้าใส่รหัสผ่าน (ซองจดหมาย) -->
+    <div id="login-screen" class="w-full max-w-md flex flex-col items-center transition-all duration-500 z-10">
+        
+        <div class="relative animate-float mb-8 mt-10">
+            <div class="text-brown-300 text-8xl relative z-10 drop-shadow-lg">
+                <i class="fa-solid fa-envelope-open-text"></i>
+            </div>
+            <i class="fa-solid fa-heart text-red-400 text-2xl absolute -top-2 -right-4 animate-pulse"></i>
+            <i class="fa-solid fa-star text-accent text-xl absolute top-8 -left-6 animate-pulse" style="animation-delay: 1s;"></i>
+        </div>
+
+        <div class="glass-panel w-full rounded-3xl p-8 text-center">
+            <h1 class="text-2xl font-bold mb-2">You have a letter 💌</h1>
+            <p class="text-sm text-brown-800/70 mb-6">มีข้อความถึงคุณ... กรุณาใส่รหัสเพื่อเปิดอ่านนะ</p>
+
+            <div class="space-y-4">
+                <div class="relative">
+                    <input type="text" id="secret-code" placeholder="ใส่รหัสของคุณที่นี่..." 
+                        class="w-full px-5 py-3 rounded-2xl bg-white border-2 border-cream-300 focus:border-brown-300 focus:outline-none text-center text-lg transition-colors placeholder-brown-800/30">
+                </div>
+                
+                <p id="error-msg" class="text-red-400 text-sm hidden font-medium">ไม่พบรหัสนี้ ลองตรวจสอบอีกครั้งนะ 🥺</p>
+                <p id="system-error-msg" class="text-red-500 text-xs hidden mt-1 font-medium">ไม่สามารถเชื่อมต่อระบบหลังบ้านได้ (ระบบใช้ข้อมูลสำรองแทน)</p>
+
+                <button id="open-btn" onclick="checkCode()" class="w-full bg-brown-300 hover:bg-brown-400 text-white font-bold py-3 px-6 rounded-2xl transition-all transform hover:scale-105 shadow-md shadow-brown-300/30 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-unlock-keyhole"></i> เปิดจดหมาย
+                </button>
+            </div>
+        </div>
+        <p class="mt-8 text-xs text-brown-800/40">Powered by Your Brand</p>
+    </div>
+
+    <!-- Screen 2: หน้าจดหมาย (แสดงเมื่อรหัสผ่านถูกต้อง) -->
+    <div id="letter-screen" class="w-full max-w-lg hidden opacity-0 transition-opacity duration-1000 z-10">
+        
+        <button onclick="closeLetter()" class="mb-4 text-brown-800/60 hover:text-brown-800 transition-colors flex items-center gap-2 font-medium">
+            <i class="fa-solid fa-arrow-left"></i> ปิดจดหมาย
+        </button>
+
+        <div class="letter-paper w-full min-h-[500px] p-8 md:p-10 relative animate-slide-up flex flex-col">
+            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-brown-300/50 text-3xl">
+                <i class="fa-solid fa-paperclip"></i>
+            </div>
+
+            <div class="text-right text-sm text-brown-800/60 mb-6 font-medium" id="letter-date">
+                วันดีๆ วันหนึ่ง
+            </div>
+
+            <h2 class="text-2xl font-bold mb-6 text-brown-800" id="recipient-name">
+                ถึง คุณ...
+            </h2>
+
+            <div class="text-lg leading-[2rem] text-brown-800 whitespace-pre-wrap mb-10 min-h-[200px]" id="letter-message">
+                (กำลังโหลดข้อความแห่งความสุข...)
+            </div>
+
+            <div id="music-player-section" class="mt-auto pt-6 border-t-2 border-dashed border-brown-300/30 hidden">
+                <p class="text-sm font-bold mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-headphones text-brown-300"></i> เพลงนี้มอบให้คุณนะ 🎶
+                </p>
+                
+                <a id="music-link" href="#" target="_blank" rel="noopener noreferrer" 
+                   class="inline-flex items-center gap-4 bg-cream-200 hover:bg-brown-300 group transition-all duration-300 px-5 py-3 rounded-2xl shadow-sm w-full border border-brown-300/10 hover:shadow-md">
+                    <div class="w-12 h-12 rounded-full bg-white text-brown-300 group-hover:text-red-500 flex items-center justify-center flex-shrink-0 transition-colors shadow-sm">
+                        <i class="fa-brands fa-youtube text-2xl"></i>
+                    </div>
+                    <div class="flex flex-col text-left">
+                        <span class="text-brown-800 font-bold group-hover:text-white transition-colors">กดเพื่อฟังเพลง 🎵</span>
+                        <span class="text-xs text-brown-800/60 group-hover:text-white/80 transition-colors">เปิดผ่านแอปพลิเคชัน</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square ml-auto opacity-40 text-sm text-brown-800 group-hover:text-white group-hover:opacity-100 transition-all"></i>
+                </a>
+            </div>
+
+            <div class="text-right mt-8 font-bold text-brown-300 text-xl" style="font-family: 'Mali', cursive; transform: rotate(-5deg);">
+                จาก ผู้ส่งถึงคุณ ❤️
+            </div>
+        </div>
+        
+        <div class="text-center mt-6 text-brown-300 space-x-4 text-xl">
+            <i class="fa-solid fa-seedling animate-bounce-slow"></i>
+            <i class="fa-solid fa-sun animate-bounce-slow" style="animation-delay: 0.5s;"></i>
+            <i class="fa-solid fa-cloud animate-bounce-slow" style="animation-delay: 1s;"></i>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwYkqOE2QVVvyAqSqukx1A4S_Tgbx6oU2PMzEIsJk2PtT8b64xFwFlql1nEcTIYQPg/exec";
+
+        const mockDatabase = [
+            {
+                code: "love01",
+                name: "คุณคนเก่ง",
+                message: "สวัสดีคุณคนเก่ง,\n\nวันนี้เหนื่อยไหม? อยากบอกว่าคุณเก่งมากๆ แล้วนะที่ผ่านวันนี้มาได้ ไม่ว่าจะเจอเรื่องอะไรมา ขอให้รู้ไว้ว่ามีคนคอยเป็นกำลังใจให้อยู่ตรงนี้เสมอ\n\nพักผ่อนเยอะๆ ยิ้มเยอะๆ นะ โลกนี้น่ารักขึ้นเยอะเลยเวลาที่คุณยิ้ม 😊\n\nปล. ลองกดฟังเพลงด้านล่างนี้ดูนะ",
+                musicUrl: "https://www.youtube.com/watch?v=kJQP7kiw5Fk"
+            },
+            {
+                code: "smile02",
+                name: "เจ้าความสดใส",
+                message: "แฮปปี้เบิร์ธเดย์นะ!\n\nขอให้ปีนี้เป็นปีที่ใจดีกับเธอมากๆ ขอให้กินของอร่อยๆ แล้วไม่อ้วน ขอให้มีรอยยิ้มในทุกๆ วันเลยนะ\n\nรักเสมอจากเพื่อนรักของเธอ!",
+                musicUrl: "https://open.spotify.com/track/4PTG3Z6ehGkBFwjybzWkR8"
+            }
+        ];
+
+        const loginScreen = document.getElementById('login-screen');
+        const letterScreen = document.getElementById('letter-screen');
+        const errorMsg = document.getElementById('error-msg');
+        const systemErrorMsg = document.getElementById('system-error-msg');
+        const openBtn = document.getElementById('open-btn');
+        const originalBtnHTML = openBtn.innerHTML;
+        
+        const musicPlayerSection = document.getElementById('music-player-section');
+        const musicLink = document.getElementById('music-link');
+
+        async function checkCode() {
+            const inputCode = document.getElementById('secret-code').value.trim();
+            if(!inputCode) return;
+
+            openBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังค้นหาจดหมาย...';
+            openBtn.disabled = true;
+            errorMsg.classList.add('hidden');
+            systemErrorMsg.classList.add('hidden');
+
+            try {
+                const response = await fetch(`${SCRIPT_URL}?code=${encodeURIComponent(inputCode)}`, { method: 'GET' });
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    openLetter(result);
+                } else {
+                    showError();
+                }
+            } catch (error) {
+                console.warn("API Fetch Error. Using fallback data...");
+                const fallbackData = mockDatabase.find(item => item.code === inputCode);
+                
+                if (fallbackData) {
+                    systemErrorMsg.classList.remove('hidden');
+                    setTimeout(() => openLetter(fallbackData), 800);
+                } else {
+                    showError();
+                }
+            } finally {
+                openBtn.innerHTML = originalBtnHTML;
+                openBtn.disabled = false;
+            }
+        }
+
+        function showError() {
+            errorMsg.classList.remove('hidden');
+            document.getElementById('secret-code').classList.add('animate-pulse', 'border-red-400');
+            setTimeout(() => {
+                document.getElementById('secret-code').classList.remove('animate-pulse', 'border-red-400');
+            }, 1000);
+        }
+
+        document.getElementById('secret-code').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') checkCode();
+        });
+
+        function openLetter(data) {
+            loginScreen.classList.add('opacity-0', 'scale-95');
+            setTimeout(() => {
+                loginScreen.classList.add('hidden');
+                letterScreen.classList.remove('hidden');
+                setTimeout(() => letterScreen.classList.remove('opacity-0'), 50);
+
+                document.getElementById('recipient-name').innerText = `ถึง ${data.name}...`;
+                document.getElementById('letter-message').innerText = data.message;
+                
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                document.getElementById('letter-date').innerText = new Date().toLocaleDateString('th-TH', options);
+
+                if(data.musicUrl && data.musicUrl.trim() !== "") {
+                    musicLink.href = data.musicUrl;
+                    const iconEl = musicLink.querySelector('i.fa-brands, i.fa-solid');
+                    if (data.musicUrl.includes('youtube.com') || data.musicUrl.includes('youtu.be')) {
+                        iconEl.className = 'fa-brands fa-youtube text-2xl';
+                    } else if (data.musicUrl.includes('spotify.com')) {
+                        iconEl.className = 'fa-brands fa-spotify text-2xl';
+                    } else {
+                        iconEl.className = 'fa-solid fa-music text-xl';
+                    }
+                    musicPlayerSection.classList.remove('hidden');
+                } else {
+                    musicLink.href = "#"; 
+                    musicPlayerSection.classList.add('hidden');
+                }
+            }, 500);
+        }
+
+        function closeLetter() {
+            letterScreen.classList.add('opacity-0');
+            setTimeout(() => {
+                letterScreen.classList.add('hidden');
+                loginScreen.classList.remove('hidden');
+                setTimeout(() => {
+                    loginScreen.classList.remove('opacity-0', 'scale-95');
+                    document.getElementById('secret-code').value = ''; 
+                }, 50);
+            }, 500);
+        }
+
+        // ==========================================
+        // ระบบเล่นเพลง Background Music (BGM) แบบ JS Native
+        // ==========================================
+        const bgmToggle = document.getElementById('bgm-toggle');
+        const bgmIcon = bgmToggle.querySelector('i');
+        
+        // สร้าง Audio Element ผ่าน Javascript แทน HTML
+        const bgMusic = new Audio();
+        // นำ crossOrigin = "anonymous" ออก เพื่อหลีกเลี่ยงการถูกบล็อค CORS จากเบราว์เซอร์
+        bgMusic.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3"; // ลิงก์ใหม่เสถียร 100%
+        bgMusic.loop = true;
+        bgMusic.volume = 0.4;
+
+        let isMusicPlaying = false;
+        let isFallbackUsed = false;
+
+        function toggleBgm() {
+            if (isMusicPlaying) {
+                bgMusic.pause();
+                bgmIcon.className = 'fa-solid fa-volume-xmark';
+                bgmToggle.classList.remove('animate-bounce-slow');
+                bgmToggle.classList.add('animate-bounce'); 
+                isMusicPlaying = false;
+            } else {
+                // เปลี่ยนไอคอนเป็นหมุนๆ เพื่อให้รู้ว่ากำลังโหลดเพลง
+                bgmIcon.className = 'fa-solid fa-spinner fa-spin';
+                
+                const playPromise = bgMusic.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        bgmIcon.className = 'fa-solid fa-music';
+                        bgmToggle.classList.remove('animate-bounce'); 
+                        bgmToggle.classList.add('animate-bounce-slow'); 
+                        isMusicPlaying = true;
+                    }).catch(e => {
+                        console.error("Audio playback error (Primary):", e);
+                        
+                        // ถ้าลิงก์แรกเล่นไม่ได้ ให้สลับไปใช้ลิงก์สำรอง (Fallback)
+                        if (!isFallbackUsed) {
+                            console.log("Trying fallback audio source...");
+                            isFallbackUsed = true;
+                            bgMusic.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; // ลิงก์สำรอง
+                            bgMusic.load();
+                            
+                            bgMusic.play().then(() => {
+                                bgmIcon.className = 'fa-solid fa-music';
+                                bgmToggle.classList.remove('animate-bounce'); 
+                                bgmToggle.classList.add('animate-bounce-slow'); 
+                                isMusicPlaying = true;
+                            }).catch(err => {
+                                console.error("Audio playback error (Fallback):", err);
+                                bgmIcon.className = 'fa-solid fa-volume-xmark text-red-400';
+                                isMusicPlaying = false;
+                            });
+                        } else {
+                            bgmIcon.className = 'fa-solid fa-volume-xmark text-red-400';
+                            isMusicPlaying = false;
+                        }
+                    });
+                }
+            }
+        }
+
+        bgmToggle.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            toggleBgm();
+        });
+
+        // ฟังก์ชันเริ่มเล่นเพลงอัตโนมัติ
+        const startMusicOnInteraction = () => {
+            if (!isMusicPlaying) {
+                toggleBgm();
+            }
+            document.removeEventListener('click', startMusicOnInteraction);
+            document.removeEventListener('touchstart', startMusicOnInteraction);
+        };
+
+        // จับทั้งการคลิกเมาส์และการแตะหน้าจอ (Touch) บนมือถือ
+        document.addEventListener('click', startMusicOnInteraction);
+        document.addEventListener('touchstart', startMusicOnInteraction, {passive: true});
+
+    </script>
+</body>
+</html>
