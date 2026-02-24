@@ -311,7 +311,7 @@
         }
 
         // ==========================================
-        // ระบบเล่นเพลง Background Music (BGM) แบบ JS Native (Mobile Friendly ล่าสุด)
+        // ระบบเล่นเพลง Background Music (BGM) แบบ JS Native (แก้สำหรับ iOS/iPhone Safari)
         // ==========================================
         const bgmToggle = document.getElementById('bgm-toggle');
         const bgmIcon = bgmToggle.querySelector('i');
@@ -321,16 +321,15 @@
 
         function initAudio() {
             bgMusic = new Audio();
-            // ใช้ raw=1 แทน dl=0 หรือ dl=1 เพื่อให้ Dropbox ส่งไฟล์สตรีมมิ่งตรงๆ เหมาะสำหรับมือถือ iOS/Android
+            // ใช้ลิงก์ Dropbox raw=1
             bgMusic.src = "https://www.dropbox.com/scl/fi/3e68iab9f2zqqqkb7qcqh/Untitled-2.mp3?rlkey=9fz3iv9g3sgbyxztkxavxg0le&st=okpy5wri&raw=1";
-            bgMusic.type = "audio/mpeg"; 
             bgMusic.loop = true;
             bgMusic.volume = 0.4;
-            bgMusic.crossOrigin = "anonymous";
+            // ลบ bgMusic.crossOrigin = "anonymous"; ออกไปเลย เพราะ iOS ชอบเอ๋อกับคำสั่งนี้เวลาสตรีมจากลิงก์ Redirect
+            bgMusic.load(); // บังคับให้เริ่มโหลดไฟล์บน iOS ทันที
         }
 
         function toggleBgm() {
-            // สร้าง object เสียงเฉพาะตอนที่จะกดเล่นครั้งแรก เพื่อป้องกันมือถือบล็อคไฟล์ที่โหลดล่วงหน้า
             if (!bgMusic) {
                 initAudio();
             }
@@ -365,14 +364,14 @@
             toggleBgm();
         });
 
-        // ฟังก์ชันเริ่มเล่นเพลงอัตโนมัติเมื่อกดหน้าจอครั้งแรก (ใช้ once เพื่อให้ทำงานแค่ครั้งเดียว ไม่กวนระบบอื่น)
+        // ฟังก์ชันเริ่มเล่นเพลงอัตโนมัติเมื่อแตะหน้าจอ (รองรับทั้งคอมและมือถือ)
         const startMusicOnInteraction = () => {
             if (!isMusicPlaying) {
                 toggleBgm();
             }
         };
 
-        // จับการสัมผัส (touchstart) ซึ่งเสถียรสุดบนมือถือ และ click สำหรับคอมพิวเตอร์
+        // จับการสัมผัส (touchstart เป็นตัวที่ตอบสนองไวที่สุดบนมือถือ)
         document.addEventListener('click', startMusicOnInteraction, { once: true });
         document.addEventListener('touchstart', startMusicOnInteraction, { once: true, passive: true });
 
