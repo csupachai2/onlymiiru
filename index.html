@@ -311,24 +311,30 @@
         }
 
         // ==========================================
-        // ระบบเล่นเพลง Background Music (BGM) แบบ JS Native (Mobile Friendly)
+        // ระบบเล่นเพลง Background Music (BGM) แบบ JS Native (Mobile Friendly ล่าสุด)
         // ==========================================
         const bgmToggle = document.getElementById('bgm-toggle');
         const bgmIcon = bgmToggle.querySelector('i');
         
-        // สร้าง Audio Element ผ่าน Javascript
-        const bgMusic = new Audio();
-        
-        // แปลง www.dropbox.com ให้เป็น dl.dropboxusercontent.com เพื่อสตรีมไฟล์เสียงตรงๆ บนมือถือไม่ให้ติด Redirect
-        bgMusic.src = "https://dl.dropboxusercontent.com/scl/fi/3e68iab9f2zqqqkb7qcqh/Untitled-2.mp3?rlkey=9fz3iv9g3sgbyxztkxavxg0le&st=okpy5wri";
-        bgMusic.type = "audio/mpeg"; 
-        bgMusic.loop = true;
-        bgMusic.volume = 0.4;
-        bgMusic.preload = "auto";
-
+        let bgMusic = null;
         let isMusicPlaying = false;
 
+        function initAudio() {
+            bgMusic = new Audio();
+            // ใช้ raw=1 แทน dl=0 หรือ dl=1 เพื่อให้ Dropbox ส่งไฟล์สตรีมมิ่งตรงๆ เหมาะสำหรับมือถือ iOS/Android
+            bgMusic.src = "https://www.dropbox.com/scl/fi/3e68iab9f2zqqqkb7qcqh/Untitled-2.mp3?rlkey=9fz3iv9g3sgbyxztkxavxg0le&st=okpy5wri&raw=1";
+            bgMusic.type = "audio/mpeg"; 
+            bgMusic.loop = true;
+            bgMusic.volume = 0.4;
+            bgMusic.crossOrigin = "anonymous";
+        }
+
         function toggleBgm() {
+            // สร้าง object เสียงเฉพาะตอนที่จะกดเล่นครั้งแรก เพื่อป้องกันมือถือบล็อคไฟล์ที่โหลดล่วงหน้า
+            if (!bgMusic) {
+                initAudio();
+            }
+
             if (isMusicPlaying) {
                 bgMusic.pause();
                 bgmIcon.className = 'fa-solid fa-volume-xmark';
@@ -346,7 +352,7 @@
                         bgmToggle.classList.add('animate-bounce-slow'); 
                         isMusicPlaying = true;
                     }).catch(e => {
-                        console.warn("Mobile Browser or Link playback error:", e.message);
+                        console.warn("Mobile Browser playback error:", e.message);
                         bgmIcon.className = 'fa-solid fa-volume-xmark text-red-400';
                         isMusicPlaying = false;
                     });
@@ -359,19 +365,16 @@
             toggleBgm();
         });
 
-        // ฟังก์ชันเริ่มเล่นเพลงอัตโนมัติเมื่อกดหน้าจอครั้งแรก
+        // ฟังก์ชันเริ่มเล่นเพลงอัตโนมัติเมื่อกดหน้าจอครั้งแรก (ใช้ once เพื่อให้ทำงานแค่ครั้งเดียว ไม่กวนระบบอื่น)
         const startMusicOnInteraction = () => {
             if (!isMusicPlaying) {
                 toggleBgm();
             }
-            // ถอด Event ออกเมื่อคลิกแล้ว
-            document.removeEventListener('click', startMusicOnInteraction);
-            document.removeEventListener('touchend', startMusicOnInteraction);
         };
 
-        // จับทั้งการคลิกเมาส์และการแตะหน้าจอ (Touch) บนมือถือ (ใช้ touchend จะเสถียรกว่าบน iOS)
-        document.addEventListener('click', startMusicOnInteraction);
-        document.addEventListener('touchend', startMusicOnInteraction);
+        // จับการสัมผัส (touchstart) ซึ่งเสถียรสุดบนมือถือ และ click สำหรับคอมพิวเตอร์
+        document.addEventListener('click', startMusicOnInteraction, { once: true });
+        document.addEventListener('touchstart', startMusicOnInteraction, { once: true, passive: true });
 
     </script>
 </body>
