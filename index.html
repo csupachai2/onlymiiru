@@ -311,7 +311,7 @@
         }
 
         // ==========================================
-        // ระบบเล่นเพลง Background Music (BGM) แบบ JS Native
+        // ระบบเล่นเพลง Background Music (BGM) แบบ JS Native (Mobile Friendly)
         // ==========================================
         const bgmToggle = document.getElementById('bgm-toggle');
         const bgmIcon = bgmToggle.querySelector('i');
@@ -319,11 +319,12 @@
         // สร้าง Audio Element ผ่าน Javascript
         const bgMusic = new Audio();
         
-        // บังคับใช้ลิงก์ Dropbox ของคุณ (แปลง dl=0 เป็น dl=1 เพื่อสตรีมเสียงตรง)
-        bgMusic.src = "https://www.dropbox.com/scl/fi/3e68iab9f2zqqqkb7qcqh/Untitled-2.mp3?rlkey=9fz3iv9g3sgbyxztkxavxg0le&st=okpy5wri&dl=1";
+        // แปลง www.dropbox.com ให้เป็น dl.dropboxusercontent.com เพื่อสตรีมไฟล์เสียงตรงๆ บนมือถือไม่ให้ติด Redirect
+        bgMusic.src = "https://dl.dropboxusercontent.com/scl/fi/3e68iab9f2zqqqkb7qcqh/Untitled-2.mp3?rlkey=9fz3iv9g3sgbyxztkxavxg0le&st=okpy5wri";
         bgMusic.type = "audio/mpeg"; 
         bgMusic.loop = true;
         bgMusic.volume = 0.4;
+        bgMusic.preload = "auto";
 
         let isMusicPlaying = false;
 
@@ -335,7 +336,6 @@
                 bgmToggle.classList.add('animate-bounce'); 
                 isMusicPlaying = false;
             } else {
-                // เปลี่ยนไอคอนเป็นหมุนๆ เพื่อให้รู้ว่ากำลังโหลดเพลง
                 bgmIcon.className = 'fa-solid fa-spinner fa-spin';
                 
                 const playPromise = bgMusic.play();
@@ -346,8 +346,7 @@
                         bgmToggle.classList.add('animate-bounce-slow'); 
                         isMusicPlaying = true;
                     }).catch(e => {
-                        console.warn("Dropbox บล็อกการเล่นไฟล์เสียง หรือเกิดข้อผิดพลาด:", e.message);
-                        // แสดงเป็น Error สีแดงหากระบบไม่ยอมให้เล่น
+                        console.warn("Mobile Browser or Link playback error:", e.message);
                         bgmIcon.className = 'fa-solid fa-volume-xmark text-red-400';
                         isMusicPlaying = false;
                     });
@@ -360,18 +359,19 @@
             toggleBgm();
         });
 
-        // ฟังก์ชันเริ่มเล่นเพลงอัตโนมัติ
+        // ฟังก์ชันเริ่มเล่นเพลงอัตโนมัติเมื่อกดหน้าจอครั้งแรก
         const startMusicOnInteraction = () => {
             if (!isMusicPlaying) {
                 toggleBgm();
             }
+            // ถอด Event ออกเมื่อคลิกแล้ว
             document.removeEventListener('click', startMusicOnInteraction);
-            document.removeEventListener('touchstart', startMusicOnInteraction);
+            document.removeEventListener('touchend', startMusicOnInteraction);
         };
 
-        // จับทั้งการคลิกเมาส์และการแตะหน้าจอ (Touch) บนมือถือ
+        // จับทั้งการคลิกเมาส์และการแตะหน้าจอ (Touch) บนมือถือ (ใช้ touchend จะเสถียรกว่าบน iOS)
         document.addEventListener('click', startMusicOnInteraction);
-        document.addEventListener('touchstart', startMusicOnInteraction, {passive: true});
+        document.addEventListener('touchend', startMusicOnInteraction);
 
     </script>
 </body>
