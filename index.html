@@ -128,11 +128,18 @@
         </button>
 
         <div class="letter-paper w-full min-h-[500px] p-8 md:p-10 relative animate-slide-up flex flex-col">
-            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-brown-300/50 text-3xl">
-                <i class="fa-solid fa-paperclip"></i>
+            
+            <!-- โลโก้ส่วนหัวจดหมาย -->
+            <div class="flex flex-col items-center -mt-6 mb-2 relative border-b-2 border-brown-300/10 pb-0">
+                <!-- ปรับขนาดความกว้างโลโก้ให้พอดีและสวยงาม -->
+                <div class="w-40 md:w-48 flex flex-col items-center">
+                    <!-- ดึงขอบล่างขึ้นไปอีก (-mb-8) เพื่อให้เส้นคั่นและวันที่ชิดโลโก้สุดๆ -->
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczNlkpw6m2mqe4FW24w0aBUtzFubGtx7d2_vSjjvzaUtLUAJoxIFVW2WCpBh-tw-dGDDJVXKTnj6e7uZ2Lmra7oTET8I6fpKN0bH3sVfpY7XUNghagTbqGslyMZPlkJ8GVNuH9s0a2-SWYIijxCoKblm=w900-h900-s-no-gm?authuser=0" alt="Logo" class="w-full h-auto drop-shadow-sm z-10 -mb-8">
+                </div>
             </div>
 
-            <div class="text-right text-sm text-brown-800/60 mb-6 font-medium" id="letter-date">
+            <!-- วันที่ -->
+            <div class="text-right text-sm text-brown-800/60 mt-2 mb-6 font-medium" id="letter-date">
                 วันดีๆ วันหนึ่ง
             </div>
 
@@ -162,8 +169,9 @@
                 </a>
             </div>
 
-            <div class="text-right mt-8 font-bold text-brown-300 text-xl" style="font-family: 'Mali', cursive; transform: rotate(-5deg);">
-                จาก ผู้ส่งถึงคุณ ❤️
+            <!-- ลายเซ็น -->
+            <div class="text-right mt-8 font-bold text-brown-300 text-2xl" style="font-family: 'Mali', cursive; transform: rotate(-3deg);">
+                Onlymiru
             </div>
         </div>
         
@@ -297,15 +305,16 @@
         const bgmToggle = document.getElementById('bgm-toggle');
         const bgmIcon = bgmToggle.querySelector('i');
         
-        // สร้าง Audio Element ผ่าน Javascript แทน HTML
+        // สร้าง Audio Element ผ่าน Javascript
         const bgMusic = new Audio();
-        // นำ crossOrigin = "anonymous" ออก เพื่อหลีกเลี่ยงการถูกบล็อค CORS จากเบราว์เซอร์
-        bgMusic.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3"; // ลิงก์ใหม่เสถียร 100%
+        
+        // บังคับใช้ลิงก์ Dropbox ของคุณ (แปลง dl=0 เป็น dl=1 เพื่อสตรีมเสียงตรง)
+        bgMusic.src = "https://www.dropbox.com/scl/fi/3e68iab9f2zqqqkb7qcqh/Untitled-2.mp3?rlkey=9fz3iv9g3sgbyxztkxavxg0le&st=okpy5wri&dl=1";
+        bgMusic.type = "audio/mpeg"; 
         bgMusic.loop = true;
         bgMusic.volume = 0.4;
 
         let isMusicPlaying = false;
-        let isFallbackUsed = false;
 
         function toggleBgm() {
             if (isMusicPlaying) {
@@ -326,29 +335,10 @@
                         bgmToggle.classList.add('animate-bounce-slow'); 
                         isMusicPlaying = true;
                     }).catch(e => {
-                        console.error("Audio playback error (Primary):", e);
-                        
-                        // ถ้าลิงก์แรกเล่นไม่ได้ ให้สลับไปใช้ลิงก์สำรอง (Fallback)
-                        if (!isFallbackUsed) {
-                            console.log("Trying fallback audio source...");
-                            isFallbackUsed = true;
-                            bgMusic.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; // ลิงก์สำรอง
-                            bgMusic.load();
-                            
-                            bgMusic.play().then(() => {
-                                bgmIcon.className = 'fa-solid fa-music';
-                                bgmToggle.classList.remove('animate-bounce'); 
-                                bgmToggle.classList.add('animate-bounce-slow'); 
-                                isMusicPlaying = true;
-                            }).catch(err => {
-                                console.error("Audio playback error (Fallback):", err);
-                                bgmIcon.className = 'fa-solid fa-volume-xmark text-red-400';
-                                isMusicPlaying = false;
-                            });
-                        } else {
-                            bgmIcon.className = 'fa-solid fa-volume-xmark text-red-400';
-                            isMusicPlaying = false;
-                        }
+                        console.warn("Dropbox บล็อกการเล่นไฟล์เสียง หรือเกิดข้อผิดพลาด:", e.message);
+                        // แสดงเป็น Error สีแดงหากระบบไม่ยอมให้เล่น
+                        bgmIcon.className = 'fa-solid fa-volume-xmark text-red-400';
+                        isMusicPlaying = false;
                     });
                 }
             }
