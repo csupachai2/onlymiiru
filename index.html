@@ -50,17 +50,16 @@
     </script>
     <style>
         body {
-            background-color: #FDFBF7;
-            background-image: radial-gradient(#D4A373 0.5px, transparent 0.5px);
-            background-size: 20px 20px;
+            /* เอาพื้นหลังเดิมออก เพื่อใช้แอนิเมชันทะเลแทน */
             color: #5C4033;
+            background-color: #FDFBF7;
         }
         
         .glass-panel {
-            background: rgba(250, 240, 230, 0.85);
-            backdrop-filter: blur(8px);
+            background: rgba(250, 240, 230, 0.75);
+            backdrop-filter: blur(12px);
             border: 1px solid rgba(212, 163, 115, 0.3);
-            box-shadow: 0 10px 25px rgba(92, 64, 51, 0.05);
+            box-shadow: 0 10px 25px rgba(92, 64, 51, 0.08);
         }
 
         .letter-paper {
@@ -79,12 +78,137 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        /* =========================================
+           CSS Animation ทะเล & ท้องฟ้าพระอาทิตย์ตก
+           ========================================= */
+        
+        /* เลเยอร์ท้องฟ้า */
+        .sky-bg {
+            background: linear-gradient(180deg, 
+                #FDFBF7 0%,   /* Cream (กลางวัน) */
+                #FDE4CE 15%,   /* Soft Peach */
+                #F7B8A1 30%,   /* Warm Sunset Pink/Orange */
+                #E29578 50%,   /* Deeper Sunset */
+                #BC8A5F 75%,   /* Brown sunset fade */
+                #8A5A44 100%   /* Night time warm brown */
+            );
+            background-size: 100% 300%;
+            animation: skyGradient 25s ease-in-out infinite alternate;
+        }
+
+        @keyframes skyGradient {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 0% 100%; }
+        }
+
+        /* เลเยอร์พระอาทิตย์ */
+        .sun {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            animation: sunMove 25s ease-in-out infinite alternate;
+            z-index: 1;
+        }
+
+        @keyframes sunMove {
+            0% { 
+                bottom: 70%; 
+                background: #FFFDE4; 
+                box-shadow: 0 0 50px 20px rgba(255, 230, 150, 0.5); 
+            }
+            100% { 
+                bottom: 15%; /* ตกดินลงไปแตะขอบทะเล */
+                background: #FF9A76; 
+                box-shadow: 0 0 80px 30px rgba(255, 154, 118, 0.5); 
+            }
+        }
+
+        /* เลเยอร์ทะเลและคลื่น */
+        .ocean {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 25vh;
+            min-height: 150px;
+            z-index: 2;
+        }
+
+        .waves {
+            position: relative;
+            width: 100%;
+            height: 60px;
+            margin-bottom: -7px; /* Fix gap ใน Safari */
+        }
+
+        .parallax > use {
+            animation: move-forever 25s cubic-bezier(.55,.5,.45,.5) infinite;
+        }
+        .parallax > use:nth-child(1) { animation-delay: -2s; animation-duration: 7s; }
+        .parallax > use:nth-child(2) { animation-delay: -3s; animation-duration: 10s; }
+        .parallax > use:nth-child(3) { animation-delay: -4s; animation-duration: 13s; }
+        .parallax > use:nth-child(4) { animation-delay: -5s; animation-duration: 20s; }
+        
+        @keyframes move-forever {
+            0% { transform: translate3d(-90px,0,0); }
+            100% { transform: translate3d(85px,0,0); }
+        }
+
+        .sea-bottom {
+            height: calc(100% - 60px);
+            background: #BC8A5F;
+        }
+
+        /* ลายจุดไข่ปลาบางๆ คลุมทับแอนิเมชันเพื่อให้ยังคงความมินิมอล */
+        .dot-overlay {
+            background-image: radial-gradient(rgba(212, 163, 115, 0.2) 0.5px, transparent 0.5px);
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: 3;
+        }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex items-center justify-center p-4 relative overflow-x-hidden">
+
+    <!-- =========================================
+         Animated Background (Sunset & Sea)
+         ========================================= -->
+    <div class="fixed inset-0 z-[-10] overflow-hidden">
+        <!-- ท้องฟ้า -->
+        <div class="absolute inset-0 sky-bg"></div>
+        
+        <!-- พระอาทิตย์ -->
+        <div class="sun"></div>
+
+        <!-- ทะเลและคลื่น -->
+        <div class="ocean">
+            <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+                <defs>
+                    <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+                </defs>
+                <g class="parallax">
+                    <!-- คลื่นชั้นที่ 1 (หลังสุด) -->
+                    <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(240, 230, 210, 0.5)" />
+                    <!-- คลื่นชั้นที่ 2 -->
+                    <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(212, 163, 115, 0.4)" />
+                    <!-- คลื่นชั้นที่ 3 -->
+                    <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(188, 138, 95, 0.6)" />
+                    <!-- คลื่นชั้นที่ 4 (หน้าสุด สีเข้ม) -->
+                    <use xlink:href="#gentle-wave" x="48" y="7" fill="#BC8A5F" />
+                </g>
+            </svg>
+            <div class="sea-bottom"></div>
+        </div>
+
+        <!-- จุดไข่ปลาคลุมทับ -->
+        <div class="absolute inset-0 dot-overlay"></div>
+    </div>
 
     <!-- Floating Music Toggle Button -->
-    <button id="bgm-toggle" class="fixed bottom-6 right-6 w-14 h-14 bg-white/90 backdrop-blur border-2 border-brown-300 shadow-xl shadow-brown-300/20 rounded-full text-brown-300 hover:text-brown-400 hover:scale-110 transition-all z-50 flex items-center justify-center text-2xl animate-bounce">
+    <button id="bgm-toggle" class="fixed bottom-6 right-6 w-14 h-14 bg-white/70 backdrop-blur-md border border-brown-300 shadow-xl shadow-brown-300/20 rounded-full text-brown-300 hover:text-brown-400 hover:scale-110 transition-all z-50 flex items-center justify-center text-2xl animate-bounce">
         <i class="fa-solid fa-volume-xmark"></i>
     </button>
 
@@ -92,11 +216,14 @@
     <div id="login-screen" class="w-full max-w-md flex flex-col items-center transition-all duration-500 z-10">
         
         <div class="relative animate-float mb-8 mt-10">
-            <div class="text-brown-300 text-8xl relative z-10 drop-shadow-lg">
+            <!-- เปลี่ยนซองจดหมายเป็นสีครีมและเอา opacity ออกให้สว่างชัดเจน -->
+            <div class="text-cream-100 text-8xl relative z-10 drop-shadow-2xl">
                 <i class="fa-solid fa-envelope-open-text"></i>
             </div>
-            <i class="fa-solid fa-heart text-red-400 text-2xl absolute -top-2 -right-4 animate-pulse"></i>
-            <i class="fa-solid fa-star text-accent text-xl absolute top-8 -left-6 animate-pulse" style="animation-delay: 1s;"></i>
+            <!-- ปรับหัวใจให้สีสดขึ้นและใหญ่ขึ้นเล็กน้อย -->
+            <i class="fa-solid fa-heart text-red-500 drop-shadow-md text-3xl absolute -top-2 -right-5 animate-pulse"></i>
+            <!-- ปรับดาวให้สีเหลืองสว่างขึ้นและใหญ่ขึ้นเล็กน้อย -->
+            <i class="fa-solid fa-star text-yellow-300 drop-shadow-md text-2xl absolute top-8 -left-8 animate-pulse" style="animation-delay: 1s;"></i>
         </div>
 
         <div class="glass-panel w-full rounded-3xl p-8 text-center">
@@ -106,10 +233,10 @@
             <div class="space-y-4">
                 <div class="relative">
                     <input type="text" id="secret-code" placeholder="ใส่รหัสของคุณที่นี่..." 
-                        class="w-full px-5 py-3 rounded-2xl bg-white border-2 border-cream-300 focus:border-brown-300 focus:outline-none text-center text-lg transition-colors placeholder-brown-800/30">
+                        class="w-full px-5 py-3 rounded-2xl bg-white/90 border-2 border-cream-300 focus:border-brown-300 focus:outline-none text-center text-lg transition-colors placeholder-brown-800/30">
                 </div>
                 
-                <p id="error-msg" class="text-red-400 text-sm hidden font-medium">ไม่พบรหัสนี้ ลองตรวจสอบอีกครั้งนะ 🥺</p>
+                <p id="error-msg" class="text-red-500 text-sm hidden font-bold">ไม่พบรหัสนี้ ลองตรวจสอบอีกครั้งนะ 🥺</p>
                 <p id="system-error-msg" class="text-red-500 text-xs hidden mt-1 font-medium">ไม่สามารถเชื่อมต่อระบบหลังบ้านได้ (ระบบใช้ข้อมูลสำรองแทน)</p>
 
                 <button id="open-btn" onclick="checkCode()" class="w-full bg-brown-300 hover:bg-brown-400 text-white font-bold py-3 px-6 rounded-2xl transition-all transform hover:scale-105 shadow-md shadow-brown-300/30 flex items-center justify-center gap-2">
@@ -117,17 +244,17 @@
                 </button>
             </div>
         </div>
-        <p class="mt-8 text-xs text-brown-800/40">crafted with heart and soul, just for you.</p>
+        <p class="mt-8 text-xs text-brown-800/60 font-medium bg-white/30 px-4 py-1 rounded-full backdrop-blur-sm">crafted with heart and soul, just for you.</p>
     </div>
 
     <!-- Screen 2: หน้าจดหมาย (แสดงเมื่อรหัสผ่านถูกต้อง) -->
     <div id="letter-screen" class="w-full max-w-lg hidden opacity-0 transition-opacity duration-1000 z-10">
         
-        <button onclick="closeLetter()" class="mb-4 text-brown-800/60 hover:text-brown-800 transition-colors flex items-center gap-2 font-medium">
+        <button onclick="closeLetter()" class="mb-4 text-brown-800 bg-white/50 backdrop-blur px-4 py-2 rounded-full hover:bg-white/80 transition-colors flex items-center gap-2 font-bold shadow-sm inline-flex">
             <i class="fa-solid fa-arrow-left"></i> ปิดจดหมาย
         </button>
 
-        <div class="letter-paper w-full min-h-[500px] p-8 md:p-10 relative animate-slide-up flex flex-col">
+        <div class="letter-paper w-full min-h-[500px] p-8 md:p-10 relative animate-slide-up flex flex-col shadow-2xl shadow-brown-800/20">
             
             <!-- โลโก้ส่วนหัวจดหมาย -->
             <div class="flex flex-col items-center -mt-6 mb-2 relative border-b-2 border-brown-300/10 pb-0">
